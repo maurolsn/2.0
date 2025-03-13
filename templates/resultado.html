@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        ul { list-style-type: none; }
+    </style>
+</head>
+<body>
+    <h2>Processamento Concluído</h2>
+    <p>Os arquivos foram salvos em: <strong>{{ output_dir }}</strong></p>
+
+    <h3>Arquivos Gerados:</h3>
+    <ul>
+        {% for arquivo in arquivos_gerados %}
+            <li>{{ arquivo }}</li>
+        {% endfor %}
+    </ul>
+    
+    <a href="/">Voltar</a>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processar PDF</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        form { margin: 20px auto; width: 50%; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
+        input, button { margin: 10px; padding: 10px; width: 80%; }
+        #loading { display: none; font-size: 18px; font-weight: bold; }
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h2>Selecionar Arquivos</h2>
+    <form id="upload-form">
+        <label>Selecione o PDF:</label>
+        <input type="file" name="pdf_file" id="pdf_file" required>
+
+        <label>Selecione o arquivo de nomes (.txt):</label>
+        <input type="file" name="names_file" id="names_file" required>
+
+        <label>Escolha a pasta de destino:</label>
+        <button type="button" onclick="selecionarPasta()">Selecionar Pasta</button>
+        <span id="pastaSelecionada">Nenhuma pasta selecionada</span>
+        <input type="hidden" name="output_dir" id="output_dir">
+
+        <br><br>
+        <button type="submit">Processar</button>
+
+        <p id="loading">Processando... <span class="spinner"></span></p>
+    </form>
+
+    <script>
+        function selecionarPasta() {
+            window.showDirectoryPicker().then(dirHandle => {
+                const pastaPath = dirHandle.name;
+                document.getElementById("output_dir").value = pastaPath;
+                document.getElementById("pastaSelecionada").textContent = "Selecionado: " + pastaPath;
+            }).catch(err => console.error(err));
+        }
+
+        document.getElementById("upload-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            // Mostrar animação de carregamento
+            document.getElementById("loading").style.display = "block";
+
+            fetch("/processar", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("loading").style.display = "none";
+                alert(data.message);
+            })
+            .catch(error => {
+                document.getElementById("loading").style.display = "none";
+                alert("Erro ao processar: " + error);
+            });
+        });
+    </script>
+</body>
+</html>
