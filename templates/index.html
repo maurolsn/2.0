@@ -31,10 +31,62 @@
         <div id="status" class="mt-4 text-center text-gray-600"></div>
     </div>
 
+    <!-- Modal de Progresso -->
+    <div id="progressModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h3 class="text-xl font-bold mb-4">Processando...</h3>
+            <div class="flex justify-center mb-4">
+                <div class="animate-spin border-4 border-blue-500 border-t-transparent rounded-full w-12 h-12"></div>
+            </div>
+            <p id="progressText">0% concluído</p>
+            <div class="w-full bg-gray-200 h-2 rounded-full mt-2">
+                <div id="progressBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        document.getElementById("uploadForm").onsubmit = function() {
-            document.getElementById("processButton").innerText = "Processando...";
-            document.getElementById("processButton").disabled = true;
+        document.getElementById("uploadForm").onsubmit = function(event) {
+            event.preventDefault();  // Previne o envio padrão do formulário
+
+            // Exibir modal de progresso
+            document.getElementById("progressModal").classList.remove("hidden");
+
+            let formData = new FormData(document.getElementById("uploadForm"));
+
+            let progress = 0;
+            let progressInterval = setInterval(() => {
+                progress += 5;
+                if (progress > 95) progress = 95;
+                document.getElementById("progressText").innerText = `${progress}% concluído`;
+                document.getElementById("progressBar").style.width = `${progress}%`;
+            }, 500);
+
+            fetch("/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(progressInterval);
+                document.getElementById("progressText").innerText = "100% concluído";
+                document.getElementById("progressBar").style.width = "100%";
+
+                setTimeout(() => {
+                    document.getElementById("progressModal").classList.add("hidden");
+
+                    let statusDiv = document.getElementById("status");
+                    statusDiv.innerHTML = `
+                        <p class="text-green-600 font-bold">Processamento concluído!</p>
+                        <a href="${data.download_url}" class="block mt-2 bg-green-600 text-white p-2 rounded-lg">Baixar ZIP</a>
+                    `;
+                }, 1000);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                document.getElementById("progressModal").classList.add("hidden");
+                alert("Erro ao processar o arquivo.");
+            });
         };
     </script>
 
